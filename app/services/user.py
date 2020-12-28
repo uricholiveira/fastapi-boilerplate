@@ -38,7 +38,7 @@ def create_new_user(db: Session, user: schema.UserRegister) -> Union[model.User,
 
 def update_user(db: Session, userid: int, user: schema.UserIn) -> Union[model.User, HTTPException]:
     updated_user = get_user_by_id(db, userid)
-    for field in user.dict():
+    for field in user.dict(exclude_none=True):
         setattr(updated_user, field, user.dict()[field])
     db.add(updated_user)
     db.commit()
@@ -48,7 +48,7 @@ def update_user(db: Session, userid: int, user: schema.UserIn) -> Union[model.Us
 
 def patch_user(db: Session, userid: int, user: schema.UserIn) -> Union[model.User, HTTPException]:
     updated_user = get_user_by_id(db, userid)
-    for field in user.dict(exclude_unset=True):
+    for field in user.dict(exclude_unset=True, exclude_none=True):
         setattr(updated_user, field, user.dict()[field])
     db.add(updated_user)
     db.commit()

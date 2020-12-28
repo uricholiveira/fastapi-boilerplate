@@ -1,10 +1,13 @@
-from fastapi import APIRouter, Depends
+from datetime import timedelta
+from dynaconf import settings
+from fastapi import APIRouter, Depends, HTTPException
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from typing import List
 
 from app.ext.db import get_db
-from app.services import user as user_service
-from app.schemas import user as user_schema
+from app.services import user as user_service, authentication as authentication_service
+from app.schemas import user as user_schema, authentication as authentication_schema
 
 router = APIRouter(prefix='/user', tags=['User'])
 
@@ -34,6 +37,22 @@ def patch_user(db: Session = Depends(get_db), userid: int = 0, user: user_schema
     return user_service.patch_user(db, userid, user)
 
 
-@router.delete('/{userid}', description='Delete user', responses={200: {'detail': 'User deleted'}})
+@router.delete('/{userid}', description='Delete user', responses={200: {'detail': 'User deleted'}},
+               dependencies=[Depends(authentication_service.oauth2_schema)])
 def delete_user(db: Session = Depends(get_db), userid: int = 0):
     return user_service.delete_user(db, userid)
+
+
+@router.post('/login', response_model=authentication_schema.TokenData)
+def login(form: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+    user = authentication_service.authenticate_user(db, form)
+    if not user:
+        raise HTTPException(status_code=404, detail='Incorrect emai or password', headers={'Authorization': 'Bearer'})
+    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = authentication_service.create_access_token(data={'sub': user.email}, expires_delta=access_token_expires)
+    return {
+        'access_token': access_token,
+        'token_expire': access_token_expires,
+        'token_type': 'Bearer',
+        'user': user
+    }
