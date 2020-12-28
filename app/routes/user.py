@@ -1,7 +1,7 @@
 from datetime import timedelta
 from dynaconf import settings
-from fastapi import APIRouter, Depends, HTTPException
-from fastapi.security import OAuth2PasswordRequestForm
+from fastapi import APIRouter, Depends, HTTPException, Body
+from app.ext.oauth import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from typing import List
 
@@ -23,17 +23,17 @@ def get_user_by_id(db: Session = Depends(get_db), userid: int = None):
 
 
 @router.post('/', response_model=user_schema.UserOut, description='Create a new user')
-def create_new_user(db: Session = Depends(get_db), user: user_schema.UserRegister = Depends()):
+def create_new_user(db: Session = Depends(get_db), user: user_schema.UserRegister = Body(...)):
     return user_service.create_new_user(db, user)
 
 
 @router.put('/{userid}', response_model=user_schema.UserOut, description='Update user')
-def update_user(db: Session = Depends(get_db), userid: int = 0, user: user_schema.UserIn = Depends()):
+def update_user(db: Session = Depends(get_db), userid: int = 0, user: user_schema.UserIn = Body(...)):
     return user_service.update_user(db, userid, user)
 
 
 @router.patch('/{userid}', response_model=user_schema.UserOut, description='Update user fields')
-def patch_user(db: Session = Depends(get_db), userid: int = 0, user: user_schema.UserPatch = Depends()):
+def patch_user(db: Session = Depends(get_db), userid: int = 0, user: user_schema.UserPatch = Body(...)):
     return user_service.patch_user(db, userid, user)
 
 

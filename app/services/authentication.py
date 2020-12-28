@@ -2,7 +2,7 @@ import arrow
 from datetime import timedelta
 from dynaconf import settings
 from fastapi import Depends, HTTPException
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from app.ext.oauth import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import jwt, JWTError
 from sqlalchemy.orm import Session
 from typing import Union, Optional, Any
