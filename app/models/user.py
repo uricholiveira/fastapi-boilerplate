@@ -18,7 +18,7 @@ class User(Base):
     arrow.get()
     updated_at = Column(DateTime, nullable=True, default=None, onupdate=arrow.utcnow().datetime)
     is_active = Column(Boolean, nullable=False, default=True)
-    is_admin = Column(Boolean, nullable=False, default=True)
+    is_admin = Column(Boolean, nullable=False, default=False)
 
     @property
     def password(self):
